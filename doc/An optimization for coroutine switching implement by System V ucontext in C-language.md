@@ -47,7 +47,7 @@ _get_cc(int nr, int ss)
 
 ### 2 cs_yield_from() 严格同步子协程
 有没有发现——上一次并未完全严格实现 cs_yield_from() 对其子协程的同步，现在来完成吧。
-```C 
+```C
 #define BACKYF      (0x10)
 /**
  * coroutine control unit structure */
@@ -119,7 +119,7 @@ _cc_cos_scheduler(cc_s *cc)
 通过查看协程汇编程序以确定该协程的运行栈空间大小，此方法有些土但真实有效，如果要追求对内存资源的节约，土土也是值得的。
 另外，此文已将 ucontext 所需栈空间大小以宏的方式定义在了 ln_cs.h 中，并且留了裕度。
 
-通过该方式，内存资源大概节约了三分之一，即协程并发上限可提升3倍。第6小节将为主线程预分配的占空间去除后并发上限将大于3倍。
+通过该方式，内存资源大概节约了三分之一，即协程并发上限可提升近3倍。在第6小节将为主线程预分配的空间去除后，并发上限将提升近6倍。
 ```C
 #define BYTES
 /* enlarge this value when stack of interfaces 
