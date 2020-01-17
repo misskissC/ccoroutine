@@ -1,10 +1,15 @@
-brief for ucoroutine-switching
-------------------------------
-`ucoroutine-switchin` is a coroutine switching implement by System V ucontext in C-language. I have had wrote two blogs to flatter `ucoroutine-switching`, but it‘s core routines always less than 500 lines, this is the reason i still love it.<br>
+A coroutine switching implement by System V ucontext in C-language
+----
 
-The potential bottleneck of `ucoroutine-switching` besets me at the same time, so god hopes more knowledgeable guys just like you can **continue to improve it**.<br>
+The coroutine switching implement by System V ucontext in C-language called `ucoroutine-switching` this time. <br>
 
-### 1 catalogs
+The `cs_yield()`, `cs_yield_from()`, `cs_send()`, `cs_loop()` in `ucoroutine-switching` are just like the `yield`, `yield from`, `generator.send()`, `asyncio.loop()` in python respectively. 
+
+I have had wrote two blogs to flatter `ucoroutine-switching`, but it‘s core routines always less than 500 lines, this is the reason i still love it.<br>
+
+The potential bottleneck of `ucoroutine-switching` besets me at the same time, so goddess hopes more knowledgeable guys just like you can **continue to improve it**.<br>
+
+### catalogs
 ```C
 .
 ├── doc
@@ -28,10 +33,10 @@ The potential bottleneck of `ucoroutine-switching` besets me at the same time, s
     └── ln_cs.c
 ```
 `src`, core routines for `ucoroutine-switching`. <br>
-`experiences`, namely examples for `ucoroutine-switching`, `yield`, `yield from`, `loop` experiences included. <br>
+`experiences`, namely examples for `ucoroutine-switching`, `yield`, `send`, `yield from`, `loop` experiences included. <br>
 `doc`, chinese documents or notes for `ucoroutine-switching`. <br>
 
-### 2 running experience
+### running experience
 running 20000000 simple coroutines such as `_co_yield_from_fn` && `_co_fn` in `loop_e` to experience `ucoroutine-switching`.
 10000000 coroutines(_co_fn) switching, other 10000000 coroutines(_co_yield_from_fn) used to sync the former 10000000 coroutines to terminate respectively.
 ```C

@@ -1,61 +1,46 @@
-### 序
+一种在C语言中用 System V ucontext 所实现协程切换的优化 
+----
+
 前段时间，此文的电脑被人霸占做PPT去了。是的没错，霸占。
 
 那些夜晚只能喝着一碗醪糟水并尝试阅读李娟的散文。随着翻页篇章稍厚，再一次陷入对其文字的带着羡慕的欣赏之中。这些与描述内容具天生契合性的文字竟间接地鼓舞着心灵不为小事而偏离善良。这些由一针一线编织在箱底的珍宝，真令人赞叹。
 
-于是想到优化“一种在C语言中用 System V ucontext 实现的协程切换”的事。此种激励或许是此文对这个世界仅存有的了解了，所以再次做了等拿回电脑主权就将这些写下来的决心。
+于是想到优化“[一种在C语言中用 System V ucontext 实现的协程切换](https://blog.csdn.net/misskissC/article/details/103797570)”的事。此种激励或许是此文对这个世界仅存有的了解了，所以再次做了等拿回电脑主权就将这些写下来的决心。
 
 为了尽量突显此协程与其他并发方式[^1]在资源方面的优势，以及提升此协程在各型[^2]计算机上协程的并发上限，此文对该协程机制进行了一些修改和补充。
 
 随之将其上传到 github 的主要原因是想到此文对该程序的优化手段或许已山穷水尽，从而希望互联网中与此文具相同理念的同学出出新招去进一步提升该程序的水平。
-ucoroutine_switching github 地址：https://github.com/misskissC/ucoroutine_switching 
+ucoroutine_switching github 地址：[https://github.com/misskissC/ucoroutine_switching](https://github.com/misskissC/ucoroutine_switching) 
+```C
+.
+├── doc
+│   ├── A coroutine switching implement ... in C-language.md
+│   └── An optimization for ... in C-language.md
+├── experiences
+│   ├── loop_e
+│   │   ├── loop_e.c
+│   │   ├── Makefile
+│   ├── yield_e
+│   │   ├── Makefile
+│   │   └── yield_e.c
+│   └── yield_from_e
+│       ├── Makefile
+│       └── yield_from_e.c
+├── include
+│   ├── ln_comm.h
+│   └── ln_cs.h
+├── readme.md
+└── src
+    └── ln_cs.c
+```
+在 ln_cs.c 中的核心代码不到500行。
 
 下面是此文的一些优化线索。
 
-### 1 将协程运行栈空间大小的设置交给调用者
-每个协程控制单元结构体将继承调用者所设置的栈空间大小。
-```C
-/**
- * coroutine control unit structure */
-typedef struct coroutine_control_s {
-    /* ... */
-    
-    /* coroutine stack size(byte) in 
-       current coroutine control unit.*/
-    int ss;
-} cc_s;
-
-static cc_s * 
-_get_cc(int nr, int ss)
-{
-    ci_s *ci = NULL;
-    cc_s *cc = NULL;
-
-    cc = (cc_s *)calloc(sizeof(cc_s), 1);
-    IF_EXPS_THEN_RETURN(!cc, NULL);
-
-    ci = _get_unit_ci(nr, ss);
-    IF_EXPS_THEN_RETURN(!ci && ln_free(cc), NULL);
-    _SET_CC_MBR(ss, ss);
-    _SET_CC_MBR(ci, ci);
-    _SET_CC_MBR(nr, nr);
-    _SET_CC_MBR(unused, nr);
-
-    return cc;
-}
-```
-
-### 2 cs_yield_from() 严格同步子协程
+### 1 cs_yield_from() 严格同步子协程
 有没有发现——上一次并未完全严格实现 cs_yield_from() 对其子协程的同步，现在来完成吧。
 ```C
 #define BACKYF      (0x10)
-/**
- * coroutine control unit structure */
-typedef struct coroutine_control_s {
-    /* ... */
-    /* magic box for logic control */
-    char box;
-} cc_s;
 
 void * 
 cs_yield_from(cc_s *cc, ci_s *self, 
@@ -80,7 +65,76 @@ cs_yield_from(cc_s *cc, ci_s *self,
 
     return rv;
 }
+```
 
+### 2 将协程运行栈空间大小的设置交给调用者
+每个协程控制单元结构体将继承调用者所设置的栈空间大小。
+```C
+/**
+ * coroutine control unit structure */
+typedef struct coroutine_control_s {
+    /* ... */
+    
+    /* coroutine stack size(byte) in 
+       current coroutine control unit.*/
+    int ss;
+} cc_s;
+
+static cc_s * 
+_get_cc(int nr, int ss)
+{
+    ci_s *ci = NULL;
+    cc_s *cc = NULL;
+
+    cc = (cc_s *)calloc(sizeof(cc_s), 1);
+    IF_EXPS_THEN_RETURN(!cc, NULL);
+
+    ci = _get_unit_ci(nr, ss);
+    IF_EXPS_THEN_RETURN(!ci && ln_free(cc), NULL);
+    _SET_CC_MBR(ss, ss);
+    /* ... */
+
+    return cc;
+}
+```
+
+### 3 查看协程运行栈空间大小的土方法
+之前为每个协程默认分配了 32Kb 栈空间，运行 100000 个协程时，加上为主线程预分配的内存，共需要 6.4Gb 内存。如此对于内存资源少的计算机来说，并发上限不会很高。
+
+1中将协程运行栈空间大小的设置权完全交给了调用者，用户该如何设置该参数才能尽量避免内存空间的浪费呢？此文想到了一个方法，但是可能有点“土”——通过查看协程汇编代码确定该协程的运行栈空间大小。
+
+在 experiences 下的子目录中运行 make asm 就可以得到各C源文件对应的汇编源文件啦，如 _co_fn 协程运行所需栈空间为48字节。
+```C
+/* ln_cs.h */
+#define BYTES
+/* enlarge this value when stack of interfaces 
+   in ln_cs.c enlarged. */
+#define CS_MARGIN      (1024)BYTES
+
+/* this value got by test */
+#define UCSWAP_STACK   ((1024 << 3) + (1024 << 1) + 1024)BYTES
+#define CS_INNER_STACK (CS_MARGIN + UCSWAP_STACK)
+
+/* yield_e.c */
+/* the stack needed by interfaces is about CS_INNER_STACK.
+ * the _fo_fn's stack got by its assembly:
+ * 
+ * _co_fn:
+ *     pushq   %rbp
+ *     movq    %rsp, %rbp
+ *     subq    $48, %rsp
+ * ... */
+#define _COFN      (48)
+#define _CO_MARGIN (0)
+#define _CO_STACK  (_COFN + CS_INNER_STACK)
+```
+此方法有些土但真实有效，如果要追求对内存资源的节约，土土也是值得的。另外，此文已将 ucontext 所需栈空间大小以宏（CS_INNER_STACK）的方式定义在了 ln_cs.h 中，并且留了裕度。
+
+通过该方式，内存资源大概节约了三分之一，即协程并发上限可提升近3倍。在第6小节将为主线程预分配的空间去除后，并发上限将提升近6倍。
+
+### 4 首尾向后向前分别调度协程运行
+在协程单元数较大时可提升调度时间效率，该方法适用于服务器机型大并发量。
+```C
 static void inline 
 _running_ci(ci_s *ci)
 {
@@ -90,11 +144,7 @@ _running_ci(ci_s *ci)
     }
     return ;
 }
-```
 
-### 3 首尾向后向前分别调度协程运行
-在协程单元数较大时可提升调度时间效率，该方法适用于服务器机型大并发量。
-```C
 static void 
 _cc_cos_scheduler(cc_s *cc)
 {
@@ -113,38 +163,8 @@ _cc_cos_scheduler(cc_s *cc)
 }
 ```
 
-### 4 查看协程运行栈空间大小的土方法
-之前为每个协程默认分配了 32Kb 栈空间，运行 100000 个协程时，加上为主线程预分配的内存，共需要 6.4Gb 内存。如此对于内存资源少的计算机来说，并发上限不会很高。
-
-通过查看协程汇编程序以确定该协程的运行栈空间大小，此方法有些土但真实有效，如果要追求对内存资源的节约，土土也是值得的。
-另外，此文已将 ucontext 所需栈空间大小以宏的方式定义在了 ln_cs.h 中，并且留了裕度。
-
-通过该方式，内存资源大概节约了三分之一，即协程并发上限可提升近3倍。在第6小节将为主线程预分配的空间去除后，并发上限将提升近6倍。
-```C
-#define BYTES
-/* enlarge this value when stack of interfaces 
-   in ln_cs.c enlarged. */
-#define CS_MARGIN      (1024)BYTES
-
-/* this value got by test */
-#define UCSWAP_STACK   ((1024 << 3) + (1024 << 1) + 1024)BYTES
-#define CS_INNER_STACK (CS_MARGIN + UCSWAP_STACK)
-
-/* the stack needed by interfaces is about CS_INNER_STACK.
- * the _fo_fn's stack got by its assembly:
- * 
- * _co_fn:
- *     pushq   %rbp
- *     movq    %rsp, %rbp
- *     subq    $48, %rsp
- * ... */
-#define _COFN      (48)
-#define _CO_MARGIN (0)
-#define _CO_STACK  (_COFN + CS_INNER_STACK)
-```
-
 ### 5 创建协程时运行已有协程
-边创建协程边运行已有协程的好处不仅可以提升并发现象，最主要的作用是可以节约内存——复用协程切换次数较少的协程数据结构体。诸如运行体验 loop_e.c 中的协程_co_fn，cs_loop()可处理的协程量无上限。
+边创建协程边运行已有协程的好处不仅可以提升并发现象，还有节约内存的效果——复用协程切换次数较少的协程数据结构体。诸如运行体验 loop_e.c 中的协程_co_fn，cs_loop()可处理的协程量无上限。
 ```C
 /* coroutine logic control */
 #define YFCO    (0x01)
@@ -156,6 +176,31 @@ _cc_cos_scheduler(cc_s *cc)
 #if RUNNING_WHEN_CREATING
 #define LOOP_AWHILE
 #endif
+
+/**
+ * coroutine control unit structure */
+typedef struct coroutine_control_s {
+    /* ... */
+    /* magic box for logic control */
+    char box;
+} cc_s;
+
+void * 
+cs_yield_from(cc_s *cc, ci_s *self, 
+    char *id, void *co, void *arg)
+{
+    /* ... */
+    
+    ci_s *ci = NULL;
+    cc->box |= YFCO;
+    ci = cs_co(cc, id, co, arg);
+    cc->box &= ~YFCO;
+    IF_EXPS_THEN_RETURN(!ci, NULL);
+
+    /* ... */
+
+    return rv;
+}
 
 static void inline 
 _loop_awhile(cc_s *cc, ci_s *ci)
@@ -184,10 +229,7 @@ cs_co(cc_s *cc,
     
     ci = _get_cc_idle_ci(cc);
     IF_EXPS_THEN_RETURN(!ci, NULL);
-    _SET_CI_MBR(co, co);
-    _SET_CI_MBR(id, id);
-    _SET_CI_MBR(arg, arg);
-    _SET_CI_MBR(state, BORN);
+    /* ... */
     
     ci->back = _get_cc_idle_ci(cc);
     IF_EXPS_THEN_RETURN(!ci->back && !(ci->state = PREGNANT), NULL);
@@ -204,6 +246,7 @@ cs_co(cc_s *cc,
     return ci;
 }
 ```
+可进一步修改 _loop_awhile 的运行方式，如直到运行有协程运行终止（包含有限次切换的协程）为止或指定已有协程的切换次数。
 
 ### 6 在服务器或嵌入式设备上运行
 若拥有内存资源特别富有的计算机，那可为并发的协程预分配内存资源以省去频繁的内存分配和释放开销。若所拥有的计算机资源较贫乏，则边运行边分配和释放内存资源。
@@ -258,26 +301,21 @@ _get_unit_ci(int nr, int ss)
 static void inline 
 _co_end(ci_s *ci)
 {
-    _SET_CI_MBR(co,     NULL);
-    _SET_CI_MBR(arg,    NULL);
-    _SET_CI_MBR(state, PREGNANT);
+    /* ... */
 #ifndef CO_STACK_PRE
     free(ci->stack);
     _SET_CI_MBR(stack, NULL);
 #endif
     UNUSED(ci)++;
     
-    if (ci->back && (BSTATE(ci) == BACKCI)) {
-        BSTATE(ci) = PREGNANT;
-        BUNUSED(ci)++;
-    }
+    /* ... */
 
     return ;
 }
 ```
 
 ### 7 简单运行体验一下吧
-#### (1) yield
+#### (1) 体验实现的yield 机制
 ```C
 /**
  * yield_e.c,
@@ -365,6 +403,7 @@ main(void)
 
     return 0;
 }
+
 ```
 
 进入 yield_e 目录运行 make 后运行可执行文件。
@@ -375,7 +414,7 @@ main(void)
 _co_fn not running now
 ```
 
-#### (2) yield from
+#### (2) 体验实现的yield from——同步子协程终止机制
 ```C
 /**
  * yield_from_e.c,
@@ -496,6 +535,7 @@ main(void)
 
     return 0;
 }
+
 ```
 
 进入 yield_from_e 目录运行 make 后运行可执行文件。
@@ -512,7 +552,7 @@ main(void)
 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012345678
 ```
 
-#### (3) loop
+#### (3) 体验实现的loop——协程自动切换
 ```C
 /**
  * loop_e.c,
@@ -646,12 +686,12 @@ main(void)
 在 loop_e.c 运行过程中查看运行 20000000 个简单协程（_co_yield_from_fn && _co_fn）时的资源消耗情况。
 ```C
 PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
- 3357 lixianru  20   0    4348    352    276 R  29.2  0.0   0:19.75 co_loop_experience
+ 3357 lxr     20   0    4348    352    276 R  29.2  0.0   0:19.75 co_loop_experience
 ```
 相比最初的程序，4中的土方法可绝对的节约内存。
 
 边创建边运行机制在协程切换次数有限（如_co_fn） 情况下可完美节约内存资源，是一种策略型的内存节约方式。除节约内存的可能性外，该方法还可提升协程并发感。虽然该方法不能绝对达到节约内存的目的，但其实现比较困难——在此版本之前此文想了近10种控制逻辑，皆以失败告终。
 
 
-[^1]：如线程。
-[^2]：如服务器，个人笔记本，嵌入式开发板等。
+[^1]: 如线程。
+[^2]: 如服务器，个人笔记本，嵌入式开发板等。

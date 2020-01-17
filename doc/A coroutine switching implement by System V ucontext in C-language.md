@@ -1,4 +1,5 @@
 一种在C语言中用 System V ucontext 实现的协程切换
+----
 
 ### 1 python 协程原理
 尝试了解上篇文字“一种在 python 中用 asyncio 和协程实现的IO并发”中协程的基本原理。python 协程可基于其生成器实现，其生成器由 yield 和 yield from[^1] 标识。
