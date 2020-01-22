@@ -685,8 +685,12 @@ main(void)
 
 在 loop_e.c 运行过程中查看运行 20000000 个简单协程（_co_yield_from_fn && _co_fn）时的资源消耗情况。
 ```C
-PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
- 3357 lxr     20   0    4348    352    276 R  29.2  0.0   0:19.75 co_loop_experience
+top - 16:41:24 up 3 days,  8:02,  3 users,  load average: 0.49, 0.24, 0.15
+Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  3.6 us,  4.5 sy,  0.0 ni, 91.5 id,  0.1 wa,  0.0 hi,  0.3 si,  0.0 st
+
+  PID USER    PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+18036 lxr     20   0    4348    352    276 R  28.2  0.0   0:12.37 co_loop_experie
 ```
 相比最初的程序，4中的土方法可绝对的节约内存。
 
