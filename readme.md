@@ -43,10 +43,10 @@ running 20000000 simple coroutines such as `_co_yield_from_fn` && `_co_fn` in `l
 ```C
 [a@b loop_e]$ make
 gcc -Wall -g -I../../include -DRUNNING_WHEN_CREATING=1 -DMEMORY_ALLOC_PRE=0 \
-    -o co_loop_experience \
+    -o loop_e \
     ../../src/ln_cs.c ./loop_e.c
 [a@b loop_e]$
-[a@b loop_e]$ ./co_loop_experience 2>o.txt
+[a@b loop_e]$ ./loop_e 2>o.txt
 [a@b loop_e]$ vi o.txt
        1 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
        2 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
@@ -64,6 +64,6 @@ Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
 %Cpu(s):  3.6 us,  4.5 sy,  0.0 ni, 91.5 id,  0.1 wa,  0.0 hi,  0.3 si,  0.0 st
 
   PID USER    PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-18036 lxr     20   0    4348    352    276 R  28.2  0.0   0:12.37 co_loop_experie
+18036  lxr    20   0    4348    352    276 R  28.2  0.0   0:12.37  loop_e
 ```
 the memory consumption will increase more when the corotines' number and running time growth.
