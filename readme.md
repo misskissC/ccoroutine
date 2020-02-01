@@ -16,7 +16,7 @@ The potential bottleneck of `ucoroutine-switching` besets me at the same time, s
 │   ├── A coroutine switching implement ... in C-language.md
 │   └── An optimization for ... in C-language.md
 ├── experiences
-|   |—— make_e
+│   ├── make_e
 │   ├── loop_e
 │   │   ├── loop_e.c
 │   │   ├── Makefile
