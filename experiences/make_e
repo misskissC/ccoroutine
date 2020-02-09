@@ -1,28 +1,42 @@
-# shared by all experiences
-# lxr, 2020.01
-ROOT_PATH=../..
-SRC=$(ROOT_PATH)/src
-INCLUDE=$(ROOT_PATH)/include
-SRCS=$(wildcard $(SRC)/*.c ./*.c)
-HDRS=$(wildcard $(INCLUDE)/*.h $(SRC)/*.h)
+# sub-make for experiences
+#
+# usage:
+#	include make_e
+# define ROOT_PATH CCTX PRE_MACRO 
+# befor make_e included.
+#
+# lxr, 2020.02
 
+SRC_PATH=$(ROOT_PATH)/src
+INCLUDE = -I$(ROOT_PATH)/include
+
+-include $(SRC_PATH)/make_p
 CC=gcc
-CFLAGS +=-Wall -g -I$(INCLUDE) $(PRE_MACRO)
+CFLAGS += -Wall -g $(INCLUDE)
 
-all: $(TARGET)
+all: src_objs e_objs $(TARGET)
 
-$(TARGET): $(SRCS) $(HDRS) Makefile
+LN_PRE_MACRO=$(PRE_MACRO)
+export LN_PRE_MACRO
+SRC_OBJS=objs
+src_objs:
+	@make -C $(SRC_PATH) \
+		CCTX=$(CCTX) OBJS=$(SRC_OBJS)
+
+SRCS = $(wildcard ./*.c)
+OBJS = ${patsubst %.c, %.o, $(SRCS)}
+e_objs: $(OBJS)
+
+%.o:%.c
 	$(CC) $(CFLAGS) \
-    -o $@ \
-    $(SRCS)
+	-c $< -o $@
+-include $(SRC_PATH)/make_d
 
-asm: $(SRCS) $(HDRS) Makefile
-	$(CC) $(CFLAGS) \
-    -S $(SRCS)
-
-asm_clean:
-	-rm -f *.s
+$(TARGET):
+	$(CC) $(CFLAGS) $(OBJS) \
+		$(SRC_PATH)/$(SRC_OBJS)/*.o -o $@
 
 clean:
-	-rm -f *.s
-	-rm -f $(TARGET)
+	@make -C $(SRC_PATH) clean \
+		CCTX=$(CCTX) OBJS=$(SRC_OBJS)
+	-rm -f ./*.[do]* $(TARGET)

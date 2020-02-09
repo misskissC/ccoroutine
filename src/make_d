@@ -1,0 +1,16 @@
+# sub_make to check if corresponding 
+# C-headers updated.
+#
+# usage:
+#	include make_d
+# define SRCS and CFLAGS before make_d 
+# included.
+#
+# lxr, 2020.02
+
+-include $(SRCS:.c=.d)
+%.d:%.c
+	@set -e; rm -f $@;\
+	$(CC) -MM $(CFLAGS) $< > $@.$$$$;\
+	sed 's, *\.o[ :]*, $*.o $@ : ,g' < $@.$$$$ > $@;\
+	rm -f $@.$$$$

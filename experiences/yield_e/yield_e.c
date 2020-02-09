@@ -4,8 +4,8 @@
  *
  * lxr, 2020.01 */
 
+#include "ln_co.h"
 #include "ln_comm.h"
-#include "ln_cs.h"
 #include <string.h>
 
 /* the stack needed by interfaces is about CS_INNER_STACK.
@@ -46,9 +46,10 @@ _co_fn(uint32_t ci_l32, uint32_t ci_h32,
     int i, nr = ar->nr;
     for (i = 0; i < nr; ++i) {
         fprintf(stderr, "%d\n", i);
-        IF_EXPS_THEN_RETURN(cs_yield(ci), VOIDV);
+        IF_EXPS_THEN_RETURN(co_yield(ci), VOIDV);
     }
 
+    co_end(ci);
     return ;
 }
 
@@ -58,15 +59,15 @@ _co_fn_sends(cc_s *cc)
     ci_s *ci = NULL;
     cofn_arg_s arg = {3};
 
-    ci = cs_co(cc, "_co_fn", _co_fn, &arg);
+    ci = co_co(cc, "_co_fn", _co_fn, &arg);
     IF_EXPS_THEN_TIPS_AND_RETURN(!ci, VOIDV, 
         "Failed to create co for _co_fn\n");
 
-    cs_send(ci);
-    cs_send(ci);
-    cs_send(ci);
-    cs_send(ci);
-    cs_send(ci);
+    co_send(ci);
+    co_send(ci);
+    co_send(ci);
+    co_send(ci);
+    co_send(ci);
     
     return ;
 }
@@ -76,11 +77,11 @@ main(void)
 {
     cc_s *cc = NULL;
 
-    cc  = cs_init(CNR_UNIT, CMMB_UNIT);
+    cc  = co_init(CNR_UNIT, CMMB_UNIT);
     IF_EXPS_THEN_TIPS_AND_RETURN(!cc, CODE_NOMEM,
         "no enough memory on this machine now\n");
     _co_fn_sends(cc);
-    cs_deinit(cc);
+    co_deinit(cc);
 
     return 0;
 }

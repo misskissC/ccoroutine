@@ -4,8 +4,8 @@
  *
  * lxr, 2020.01 */
 
+#include "ln_co.h"
 #include "ln_comm.h"
-#include "ln_cs.h"
 #include <string.h>
 
 /* the stack needed by interfaces is about CS_INNER_STACK.
@@ -53,9 +53,10 @@ _co_fn(uint32_t ci_l32, uint32_t ci_h32,
     for (i = 0; i < nr; ++i) {
         ((int *)rv->buf)[i] = i;
         rv->len++;
-        cs_yield(ci);
+        co_yield(ci);
     }
 
+    co_end(ci);
     return ;
 }
 
@@ -72,7 +73,7 @@ _co_yield_from_fn(uint32_t ci_l32, uint32_t ci_h32,
         VOIDV, "bad parameter in %s\n", __func__);
 
     crv_s *rv = NULL;
-    rv = cs_yield_from(co_cc(ci), ci, "_co_fn", _co_fn, ar);
+    rv = co_yield_from(co_cc(ci), ci, "_co_fn", _co_fn, ar);
 
     int i;
     fprintf(stderr, "'%s' sync '_co_fn' terminated. '_co_fn' return-value: ", __func__);
@@ -92,11 +93,11 @@ _co_yield_from_sends(cc_s *cc)
     ci_s *ci;
     cofn_arg_s arg = {9};
     
-    ci = cs_co(cc, "_co_yield_from", _co_yield_from_fn, &arg);
+    ci = co_co(cc, "_co_yield_from", _co_yield_from_fn, &arg);
     IF_EXPS_THEN_RETURN(!ci, VOIDV);
 
     crv_s *rv;
-    while ((rv = cs_send(ci))) {
+    while ((rv = co_send(ci))) {
         fprintf(stderr, "%d\n", ((int *)rv->buf)[rv->len - 1]);
     }
     fprintf(stderr, "\n");
@@ -109,11 +110,11 @@ main(void)
 {
     cc_s *cc = NULL;
 
-    cc  = cs_init(CNR_UNIT, CMMB_UNIT);
+    cc  = co_init(CNR_UNIT, CMMB_UNIT);
     IF_EXPS_THEN_TIPS_AND_RETURN(!cc, CODE_NOMEM,
         "no enough memory on this machine now\n");
     _co_yield_from_sends(cc);
-    cs_deinit(cc);
+    co_deinit(cc);
 
     return 0;
 }

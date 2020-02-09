@@ -1,17 +1,16 @@
 /**
  * ln_comm.h,
- * common routines and 
- * declarations for ln_comm.c contained.
+ * common routines contained.
  *
  * lxr, 2020.01 */
+
+#ifndef _LN_COMM_H_
+#define _LN_COMM_H_
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#ifndef _LN_COMM_H_
-#define _LN_COMM_H_
 
 #define callconvention
 #define VOIDV (void)0

@@ -1,11 +1,11 @@
 /**
  * loop_e.c,
- * for experiencing cs_loop() mechanism
+ * for experiencing co_loop() mechanism
  *
  * lxr, 2020.01 */
 
+#include "ln_co.h"
 #include "ln_comm.h"
-#include "ln_cs.h"
 #include <string.h>
 
 /* the stack needed by interfaces is about CS_INNER_STACK.
@@ -53,9 +53,10 @@ _co_fn(uint32_t ci_l32, uint32_t ci_h32,
     for (i = 0; i < nr; ++i) {
         ((int *)rv->buf)[i] = i;
         rv->len++;
-        IF_EXPS_THEN_RETURN(cs_yield(ci), VOIDV);
+        IF_EXPS_THEN_RETURN(co_yield(ci), VOIDV);
     }
 
+	co_end(ci);
     return ;
 }
 
@@ -72,7 +73,7 @@ _co_yield_from_fn(uint32_t ci_l32, uint32_t ci_h32,
         VOIDV, "bad parameter in %s\n", __func__);
 
     crv_s *rv = NULL;
-    rv = cs_yield_from(co_cc(ci), ci, "_co_fn", _co_fn, ar);
+    rv = co_yield_from(co_cc(ci), ci, "_co_fn", _co_fn, ar);
 
     int i;
     fprintf(stderr, "'%s' sync '_co_fn' terminated."
@@ -80,9 +81,11 @@ _co_yield_from_fn(uint32_t ci_l32, uint32_t ci_h32,
     for (i = 0; i < rv->len; ++i)
         fprintf(stderr, "%d", ((int *)(rv->buf))[i]);
     fprintf(stderr, "\n");
-    if (MM_HEAP_UFREE == rv->flag)
+    if (MM_HEAP_UFREE == rv->flag) {
         free(rv->buf);
-        
+    }
+    
+    co_end(ci);
     return ;
 }
 
@@ -93,24 +96,40 @@ _co_loop_all(cc_s *cc, int conr)
     cofn_arg_s arg = {3};
 
     for (i = 0; i < conr; ++i)
-        IF_EXPS_THEN_BREAK(!cs_co(cc, "_co_fn", _co_yield_from_fn, &arg));
+        IF_EXPS_THEN_BREAK(!co_co(cc, "_co_fn", _co_yield_from_fn, &arg));
     IF_EXPS_THEN_TIPS(i < conr, "%d coroutines run failed\n", conr - i);
     
-    (void)cs_loop(cc);
+    (void)co_loop(cc);
 
     return ;
+}
+
+static void 
+_loop_all_time(cc_s *cc, int conr)
+{
+    #include <sys/time.h>
+    
+    struct timeval tv_s, tv_e;
+
+    (void)gettimeofday(&tv_s, NULL);
+    _co_loop_all(cc, conr);
+    (void)gettimeofday(&tv_e, NULL);
+
+    fprintf(stderr, "time spend %.0fmicroseconds on sync %d %s\n", 
+        (tv_e.tv_sec*1e+6 + tv_e.tv_usec) - (tv_s.tv_sec*1e+6 + tv_s.tv_usec),
+        conr, "_co_fn");
 }
 
 int callconvention 
 main(void)
 {
     cc_s *cc = NULL;
-
-    cc  = cs_init(CNR_UNIT, CMMB_UNIT);
+    
+    cc  = co_init(CNR_UNIT, CMMB_UNIT);
     IF_EXPS_THEN_TIPS_AND_RETURN(!cc, CODE_NOMEM,
         "no enough memory on this machine now\n");
-    _co_loop_all(cc, 1e+4);
-    cs_deinit(cc);
+    _loop_all_time(cc, 1e+5);
+    co_deinit(cc);
 
     return 0;
 }
