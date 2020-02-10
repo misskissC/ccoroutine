@@ -1,4 +1,4 @@
-A coroutine switching implement by System V ucontext && assembly in C-language
+A coroutine switching implement by ucontext && assembly in C-language
 ----
 
 The coroutine switching implement in C-language called `ccoroutine` this time. <br>
