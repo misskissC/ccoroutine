@@ -2,7 +2,7 @@
 ----
 
 ### 1 操作栈的数据结构体
-```java
+```C
 typedef struct asm_cctx_s {
     void **sp;
 } cctx_s;
@@ -13,7 +13,7 @@ typedef struct asm_cctx_s {
 协程切换涉及相应寄存器的备份、跳转地址的安排等内容，凡是需要严格安排栈内容的地方需要借助汇编指令来完成——C编译器会自动往栈中添加一些栈维护指令。
 
 结合相关代码来看看吧。
-```java
+```C
 /** 
  * because of the instructions on 
  * stack-frame would be automatically 
@@ -114,11 +114,11 @@ __asm__(
     #endif
 );
 ```
-实现中的相关约束都在注释里啦。
+实现中所需遵循的相关约束都在注释里啦。
 
 ### 3 给协程传参
 ucontext 通过 makecontext 为协程传参，用汇编指令支撑协程切换上下文时传参是个难点。经盘桓此文采取通过一段汇编子程序为协程传参。
-```java
+```C
 void 
 _co_arg_medium(void);
 
@@ -188,7 +188,7 @@ __asm__  (
 
 ### 4 启动协程
 当初次运行协程时，需初始协程栈，该函数可以使用C语言完成。
-```java
+```C
 int 
 co_start_asm(ci_s *ci)
 {
@@ -237,7 +237,7 @@ co_start_asm(ci_s *ci)
 [3] yield from —— 类似 python 的 yield from，用于同步基于 yield 的协程；
 [4] loop scheduler —— 略似于python 的 asyncio.loop()，用于各协程的并发调度。
 机制，作为与 ucontext 同级别的一种选择。
-```java
+```C
 /**
  * ln_context.h,
  * to get the context of coroutine 
