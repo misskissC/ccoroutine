@@ -19,11 +19,13 @@ _co_arg_medium(void);
  * those routines can't be 
  * inline-assembly in C-function.
  *
- * @caution: the routines on __i386 
+ * @reality: the routines on __i386 
  *  not tested by me. */
 __asm__  (
     "\t.globl _co_arg_medium\n"
     "_co_arg_medium:\n"
+    /* the arguments co_fn, arg, ci 
+       prepared by co_start_asm */
     #if   __i386
         "popl %eax\n\t" // get co_fn
         "popl %ecx\n\t" // get arg
@@ -76,13 +78,30 @@ __asm__  (
 __asm__(
     "\t.globl co_switch_asm\n"
     "co_switch_asm:\n"
+    
+    /* according to the call 
+       convention:
        
+       ebp, ebx, esi, edi need
+       called-function to backup
+       on i386;
+       
+       rbp, rbx, r12, r13, r14, r15
+       need called-function to backup
+       on amd64. */
     #if __i386
         "pushl %ebp\n\t"
         "pushl %ebx\n\t"
         "pushl %esi\n\t"
         "pushl %edi\n\t"
 
+        /* backup current stack-top
+           to first(left-most) argument,
+           then assign co-stack-top to esp.
+           
+           see: declaration of 
+           co_switch_asm 
+           in ln_context.h */
         "movl %esp, (%eax)\n\t"
         "movl (%edx), %esp\n\t"
         
@@ -91,6 +110,9 @@ __asm__(
         "popl %ebx\n\t"
         "popl %ebp\n\t"
          
+         /* switching. 
+            the target-address in stack 
+            by call or co_start_asm. */
         "popl  %ecx\n\t"
         "jmpl *%ecx\n\t"
 
@@ -118,6 +140,10 @@ __asm__(
        'return' statement of coroutine
        if you owns the same faith. */
 
+        /* same meaning as i386.
+           see _co_arg_medium for 
+           the argument-passing 
+           convention. */
         "movq %rsp, (%rdi)\n\t"
         "movq (%rsi), %rsp\n\t"
 
@@ -128,6 +154,8 @@ __asm__(
         "popq %rbx\n\t"
         "popq %rbp\n\t"
         
+        /* switching. 
+           same meaning as i386. */
         "popq  %rcx\n\t"
         "jmpq *%rcx\n"
         "_CORET:"
@@ -177,4 +205,3 @@ co_start_asm(ci_s *ci)
     (void)co_switch_to(co_bcctx(ci), ctx);
     return CODE_NONE;
 }
-
