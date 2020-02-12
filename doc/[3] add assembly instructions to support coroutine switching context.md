@@ -13,7 +13,7 @@ typedef struct asm_cctx_s {
 协程切换涉及相应寄存器的备份、跳转地址的安排等内容，凡是需要严格安排栈内容的地方需要借助汇编指令来完成——C编译器会自动往栈中添加一些栈维护指令。
 
 结合相关代码来看看吧。
-```C
+```java
 /** 
  * because of the instructions on 
  * stack-frame would be automatically 
@@ -118,7 +118,7 @@ __asm__(
 
 ### 3 给协程传参
 ucontext 通过 makecontext 为协程传参，用汇编指令支撑协程切换上下文时传参是个难点。经盘桓此文采取通过一段汇编子程序为协程传参。
-```C
+```java
 void 
 _co_arg_medium(void);
 
@@ -188,7 +188,7 @@ __asm__  (
 
 ### 4 启动协程
 当初次运行协程时，需初始协程栈，该函数可以使用C语言完成。
-```C
+```java
 int 
 co_start_asm(ci_s *ci)
 {
@@ -232,10 +232,12 @@ co_start_asm(ci_s *ci)
 
 ### 5 支撑协程切换
 以上汇编指令实现的协程切换上下文可嵌于[一种在C语言中用 System V ucontext 所实现协程切换的优化](https://blog.csdn.net/misskissC/article/details/103981540)中，以支撑其中的
+```C
 [1] yield —— 类似 python 的 yield，用于协程切换；
 [2] send —— 类似 python 中生成器中的 send()，用于切换到协程；
 [3] yield from —— 类似 python 的 yield from，用于同步基于 yield 的协程；
 [4] loop scheduler —— 略似于python 的 asyncio.loop()，用于各协程的并发调度。
+```
 机制，作为与 ucontext 同级别的一种选择。
 ```C
 /**
@@ -288,6 +290,8 @@ co_start_uc(ci_s *ci);
 ```
 
 此文将该汇编指令所支撑的协程切换环境嵌入到[之前](https://blog.csdn.net/misskissC/article/details/103981540)的工程中后，备份于
+
 github 地址：[https://github.com/misskissC/ccoroutine](https://github.com/misskissC/ccoroutine)
 gitee 地址：[https://gitee.com/misskissC/ccoroutine](https://gitee.com/misskissC/ccoroutine)
+
 有心情的同学可一起提升该程序哇。
