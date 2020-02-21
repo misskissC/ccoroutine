@@ -5,6 +5,22 @@ The coroutine switching implement in C-language called `ccoroutine` this time. <
 
 The `cs_yield()`, `cs_yield_from()`, `cs_send()`, `cs_loop()` in `ccoroutine` are just like the `yield`, `yield from`, `generator.send()`, `asyncio.loop()` in python respectively. 
 
+the fragment following extracted from include/ln_co.h
+```C
+/**
+ ** brief: suspending current coroutine related 
+    with ci then switch to specific coroutine 
+    when co_yield() called. 
+ ** param: ci, bears control-information for 
+               corresponding coroutine.
+ ** return: zero returned if succeeded, 
+    otherwise errno. 
+ ** sidelight: co_yield() just like the 'yield' 
+    in python. */
+extern int 
+co_yield(ci_s *ci);
+```
+
 I have had wrote two blogs to flatter `ccoroutine`, but it‘s core routines always less than 500 lines, this is the reason i still love it.<br>
 
 The potential bottleneck of `ccoroutine` besets me at the same time, so goddess hopes more knowledgeable guys just like you can **continue to improve it**.<br>
@@ -13,26 +29,26 @@ The potential bottleneck of `ccoroutine` besets me at the same time, so goddess 
 ```C
 .
 ├── doc
-│   ├── A coroutine ... in C-language.md
-│   └── An optimization ... in C-language.md
+│   ├── A coroutine ... in C-language.md
+│   └── An optimization ... in C-language.md
 ├── experiences
-│   ├── loop_e
-│   │   ├── loop_e.c
-│   ├── yield_e
-│   │   └── yield_e.c
-│   └── yield_from_e
-│       └── yield_from_e.c
+│   ├── loop_e
+│   │   ├── loop_e.c
+│   ├── yield_e
+│   │   └── yield_e.c
+│   └── yield_from_e
+│       └── yield_from_e.c
 ├── include
-│   ├── ln_co.h
-│   └── ln_comm.h
+│   ├── ln_co.h
+│   └── ln_comm.h
 ├── src
 │   ├── ln_co.c
 │   ├── context
 │       ├── ln_context.h
-│       ├── assembly
-│       │   ├── ln_asm.c
-│       └── ucontext
-│           ├── ln_uc.c
+│       ├── assembly
+│       │   ├── ln_asm.c
+│       └── ucontext
+│           ├── ln_uc.c
 ├── readme.md
 ```
 `src`, core logic for `ccoroutine`. <br>
