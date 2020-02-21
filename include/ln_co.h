@@ -1,6 +1,6 @@
 /**
- * ln_cs.h,
- * declarations for ln_cs.c 
+ * ln_co.h,
+ * declarations for ln_co.c 
  * or some else type-definitions.
  *
  * lxr, 2020.01 */
@@ -12,7 +12,7 @@
 
 #define BYTES
 /* enlarge this value when stack of interfaces 
-   in ln_cs.c enlarged. */
+   in ln_co.c enlarged. */
 #define CS_MARGIN  (1024)BYTES
 #define CCTX_STACK (((1024 << 3) + (1024 << 1) + 1024))
 #define CS_INNER_STACK (CS_MARGIN + CCTX_STACK)
