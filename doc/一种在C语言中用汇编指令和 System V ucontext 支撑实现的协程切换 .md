@@ -386,7 +386,7 @@ co_start_asm(ci_s *ci)
 }
 ```
 
-#### 2.3 统一 asm 和 ucontext的对外接口
+#### 2.3 统一 asm 和 ucontext 对外接口
 在用汇编指令和 ucontext 支撑协程切换时故意做兼容的目标就是为了对外提供统一的接口，再通过预定义宏和一些少许包装就可以实现这个目标。
 ```C
 #ifndef _LN_CONTEXT_H_
