@@ -807,3 +807,33 @@ gen_f 与 yield 标识生成的生成器 gen 不同的是——在 gen_f 所等�
 时间精力有限，此篇文字未能透露源码的所有面貌，先将源码备份在迎来合适时机时再扩展吧。
 github 备份：[https://github.com/misskissC/ccoroutine](https://github.com/misskissC/ccoroutine)
 gitee  备份：[https://giteeom/misskissC/ccoroutine](https://gitee.com/misskissC/ccoroutine)
+
+### 10 运行体验
+运行 2e+7 个简单的协程体验一下吧。1e+7 个_co_yield_from_fn 和 1e+7 个_co_fn。
+```C
+[a@b loop_e]$ make
+gcc -Wall -g -I../../include -DRUNNING_WHEN_CREATING=1 -DMEMORY_ALLOC_PRE=0 \
+    -o loop_e \
+    ../../src/ln_cs.c ./loop_e.c
+[a@b loop_e]$
+[a@b loop_e]$ ./loop_e 2>o.txt
+[a@b loop_e]$ vi o.txt
+       1 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
+       2 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
+       3 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
+...
+ 9999998 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
+ 9999999 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
+10000000 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
+```
+
+看看其内存资源消耗情况。
+```C
+top - 16:41:24 up 3 days,  8:02,  3 users,  load average: 0.49, 0.24, 0.15
+Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  3.6 us,  4.5 sy,  0.0 ni, 91.5 id,  0.1 wa,  0.0 hi,  0.3 si,  0.0 st
+
+  PID USER    PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+18036  lxr    20   0    4348    352    276 R  28.2  0.0   0:12.37  loop_e
+```
+在协程运行次数十分有限的情况下，基本不会消耗内存资源。当协程并发量充足且协程运行次数上升时，内存资源消耗会相应变多。
