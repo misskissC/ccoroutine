@@ -701,7 +701,7 @@ _running_ci(ci_s *ci)
 ### 8 python yield，yield from 原理粗探
 最后，来看看激起此文用C语言所实现目标的大概原理吧。
 
-### 8.1 yield
+#### 8.1 yield
 在实例化对象时，python 将包含 yield 语句的函数实例化为生成器。在生成器中，每通过 send() 运行到 yield 时返回，再次通过 send() 运行时从 yield 返回处继续运行。
 ```python
 >>> def fun():
@@ -813,7 +813,7 @@ gen_f 与 yield 标识生成的生成器 gen 不同的是——在 gen_f 所等�
 ### 9 源码备份
 时间精力有限，此篇文字未能透露源码的所有面貌，先将源码备份在迎来合适时机时再扩展吧。
 github 备份：[https://github.com/misskissC/ccoroutine](https://github.com/misskissC/ccoroutine)
-gitee  备份：[https://giteeom/misskissC/ccoroutine](https://gitee.com/misskissC/ccoroutine)
+gitee  备份：[https://gitee.com/misskissC/ccoroutine](https://gitee.com/misskissC/ccoroutine)
 
 ### 10 运行体验
 运行 2e+7 个简单的协程体验一下吧。1e+7 个_co_yield_from_fn 和 1e+7 个_co_fn。
