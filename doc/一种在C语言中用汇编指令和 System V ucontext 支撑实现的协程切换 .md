@@ -22,9 +22,9 @@ e.g.
 extern int 
 co_yield(ci_s *ci);
 ```
-彩蛋：在此文最后一节进行 python `yield` 和 `yield from` 原理粗探吧，先进入主题。
+彩蛋：在此文最后一节进行 python `yield` 和 `yield from` 原理粗探，先进入主题。
 
-### 2 基石——协程上下文及切换
+### 2 基石——协程上下文及切换实现
 上一节所涉及功能的共同基石是`协程上下文及切换`，此文用两种方式来支撑。
 
 #### 2.1 System V ucontext
@@ -36,7 +36,6 @@ co_yield(ci_s *ci);
 #include <ucontext.h>
 
 描述协程上下文的结构体类型 ucontext_t 至少包含以下成员。
-```C
 typedef struct ucontext_t {
     /* uc_link，由 makecontext() 
        创建协程运行结束后，程序
@@ -78,7 +77,6 @@ int getcontext(ucontext_t *ucp);
     并为 ucp->uc_link 指定 ucp 对应协程运行
     结束后 将切换运行协程的协程上下文。*/
 void makecontext(ucontext_t *ucp, void (*func)(), int argc, ...);
-
 
 /**
  ** 功能：将当前协程上下文保存在 oucp 所指
