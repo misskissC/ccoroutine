@@ -1,9 +1,9 @@
 /**
  * ln_co.c,
- * coroutine switching, sync, 
- * concurrency mechanism implement.
- * 
- * lxr, 2020.01 */
+ ** coroutine switching, sync, 
+    concurrency mechanism implement.
+  
+ ** lxr, 2020.01 */
 
 #include <errno.h>
 #include <string.h>
@@ -129,7 +129,7 @@ _get_unit_ci(int nr, int ss)
     IF_EXPS_THEN_RETURN(!ci, NULL);
 
 #ifdef CO_STACK_PRE
-    int i;char *stack = NULL;
+    int i; char *stack = NULL;
     for (i = 0; i < nr; ++i) {
         stack = (char *)calloc(ss, 1);
         IF_EXPS_THEN_RETURN(!stack && _put_unit_ci(ci, i), NULL);
@@ -182,7 +182,7 @@ _get_cc_idle_ci(cc_s *cc)
     cc_s *p   = NULL;
     cc_s *_cc = NULL;
 
-    for (_cc = cc; _cc; _cc = _cc->next){
+    for (_cc = cc; _cc; _cc = _cc->next) {
         p = _cc;
         IF_EXPS_THEN_CONTINUE(!_cc->unused);
         f  = _get_cis_idle_ci(_cc->ci, _cc->nr);
@@ -303,8 +303,7 @@ co_deinit(cc_s *cc)
 }
 
 ci_s *
-co_co(cc_s *cc, 
-    char *id, void *co, void *arg)
+co_co(cc_s *cc, char *id, void *co, void *arg)
 {
     ci_s *ci  = NULL;
     
