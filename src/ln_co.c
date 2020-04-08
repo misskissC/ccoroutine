@@ -36,10 +36,21 @@
 #define BORN        (0x01)
 #define RUNNABLE    (0x02)
 #define SUSPENDING  (0x04)
+
+/* coroutine states/natures.
+   BACKCI - the information in 
+   the ci_s variable used for 
+   another coroutine to back;
+   
+   BACKYF - the flag of the 
+   coroutine who created by 
+   co_yield_from(). */
 #define BACKCI      (0x08)
 #define BACKYF      (0x10)
 
-/* coroutine logic control */
+/* coroutine logic control:
+   the coroutine created by 
+   co_yiled_from() just now. */
 #define YFCO    (0x01)
 
 /* just give up cpu sovereignty */
@@ -270,6 +281,17 @@ _loop_awhile(cc_s *cc, ci_s *ci)
     register int conr;
     register cc_s *_cc = NULL;
 
+    /* to run born coroutines when created 
+       a new coroutine except the situation 
+       that the coroutine created by 
+       co_yield_from() just now. i.e., 
+       the `YFCO` flag in cc->box. 
+       
+       because the running of the coroutine 
+       created by co_yield_from() must occur
+       in co_yield_from(). so setting `BACKYF`
+       for current coroutines to protect it 
+       if the `YFCO` flag in cc->box. */
     IF_EXPS_THEN_RETURN((cc->box & YFCO) && 
         (BSTATE(ci) |= BACKYF), VOIDV);
 
@@ -417,12 +439,17 @@ co_yield_from(cc_s *cc, ci_s *self,
     ci_s *ci = NULL;
     void *t, *rv = NULL;
     
+    /* to set `YFCO` flag to indicate 
+       the coroutine create by co_yield_from(). */
     cc->box |= YFCO;
     ci = co_co(cc, id, co, arg);
     cc->box &= ~YFCO;
     IF_EXPS_THEN_RETURN(!ci, NULL);
 
 #define BSYF(ci) (ci->state && (BSTATE(ci) &= ~BACKYF))
+    /* clear the `BACKYF` when co_yield_from() itself 
+       runs its child-coroutine. but then set `BACKYF` 
+       agian to protect child-coroutine ran by others. */
     while (BSYF(ci) && (t = co_send(ci))) {
         if (BSTATE(ci)) BSTATE(ci) |= BACKYF;
         rv = t; self->rv = ci->rv;
