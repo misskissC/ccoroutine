@@ -5,7 +5,7 @@ The coroutine switching implement in C-language called `ccoroutine` this time. i
 
 The `co_yield()`, `co_yield_from()`, `co_send()`, `co_loop()` in `ccoroutine` are just like the `yield`, `yield from`, `generator.send()`, `asyncio.loop()` in python respectively. 
 
-I have had wrote two blogs to flatter `ccoroutine`, but it‘s core routines always less than 500 lines, this is the reason i still love it.
+I have had wrote two blogs to flatter `ccoroutine`, but it‘s core routines always less than 800 lines, this is the reason i still love it.
 
 The potential bottleneck of `ccoroutine` besets me at the same time, so goddess hopes more knowledgeable guys just like you can **continue to improve it**.
 
