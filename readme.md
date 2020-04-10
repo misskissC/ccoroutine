@@ -56,7 +56,7 @@ Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
   PID USER    PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
 18036  lxr    20   0    4348    352    276 R  28.2  0.0   0:12.37  loop_e
 ```
-协程调度本身属于CPU密集型任务，由于调度协程中无如超时等待异步（如select）机制且协程并发量大，所以`loop_e`的CPU一定会高。为讨好用户体验，`ccoroutine`在每调度一单元量的协程后就主动放弃CPU，当协程来自实际应用时（网络IO），可将主动放弃CPU的语句去除。
+协程调度本身属于CPU密集型任务，由于调度协程中无如超时等待异步（如select）机制且协程并发量大，所以`loop_e`的CPU一定会高。考虑用户体验，`ccoroutine`在每调度一单元量的协程后就主动放弃CPU，当协程来自实际应用时（网络IO），可将主动放弃CPU的语句去除。
 
 另外，当协程数量和协程运行时间同时大幅度增加时，`ccoroutine`所占内存资源也会随之上升。对于像'_co_fn'这样简单的协程，`ccoroutine`中`边运行边创建协程 + 内存即用即释放的机制`可以使其并发量无上限。
 
