@@ -3,22 +3,20 @@ A coroutine switching implement by assembly && ucontext in C-language
 
 The coroutine switching implement in C-language called `ccoroutine` this time. it is powerful and lightweight.
 
-The `cs_yield()`, `cs_yield_from()`, `cs_send()`, `cs_loop()` in `ccoroutine` are just like the `yield`, `yield from`, `generator.send()`, `asyncio.loop()` in python respectively. 
+The `co_yield()`, `co_yield_from()`, `co_send()`, `co_loop()` in `ccoroutine` are just like the `yield`, `yield from`, `generator.send()`, `asyncio.loop()` in python respectively. 
 
 I have had wrote two blogs to flatter `ccoroutine`, but it‘s core routines always less than 500 lines, this is the reason i still love it.
 
 The potential bottleneck of `ccoroutine` besets me at the same time, so goddess hopes more knowledgeable guys just like you can **continue to improve it**.
 
 ### catalogs
-`src`, core logic for `ccoroutine`.
+`src`, major logic for `ccoroutine`.the `SConscript` in `src/` would build out ccoroutine library. use `lncc = SConscript('../../src/SConscript')` to get the library path by `SConstruct` in experiences/applications.
 
-`context`, coroutine switching supporter.
+`context`, coroutine switching supporter, including assembly and ucontext.
 
-`experiences`, namely examples for `ccoroutine`, `yield`, `send`, `yield from`, `loop` experiences included.
+`experiences`, namely examples for `ccoroutine`, `co_yield`, `co_send`, `co_yield_from`, `co_loop` included.
 
-`doc`, chinese documents or notes for `ccoroutine`.
-
-the `SConscript` in `src/` would build out ccoroutine library. use `lncc = SConscript('../../src/SConscript')` to get the library path by `SConstruct` in experiences/applications.
+`doc`, chinese documents or development-diary for `ccoroutine`.
 
 ### running experience
 if you owns one running 20000000 simple coroutines such as `_co_yield_from_fn` && `_co_fn` in `loop_e` on a server-computer to experience `ccoroutine`.
