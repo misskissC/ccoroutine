@@ -1,0 +1,16 @@
+'''
+brief: to support coroutine switching 
+       by assembly instructions.
+lxr, 2020.04
+'''
+# set build environment for assembly,
+# then add special properties
+env = Environment()
+_CFLAGS = ['-g', '-Wall', '-DCCTX_UC']
+_HPATH  = ['../', '../../../include']
+env.AppendUnique(CCFLAGS = _CFLAGS, CPPPATH = _HPATH)
+
+# to get objects and return
+obj = env.Object(target = 'cctx.o', source = Glob('*.c'))
+
+Return('obj')

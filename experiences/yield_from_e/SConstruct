@@ -1,0 +1,26 @@
+'''
+brief: to get `yield_from_e` to experience yield_from_e().
+
+lxr, 2020.04
+'''
+# to set build environment 'exp_env'
+# then export it. the environment named 
+# `exp_env` would be imported by subsidiary scripts.
+exp_env = Environment()
+
+_HPATH  = ['../../include']
+_CFLAGS = ['-g', 
+        '-Wall',
+        '-DCCTX_ASM', 
+        '-DMEMORY_ALLOC_PRE=0', 
+        '-DRUNNING_WHEN_CREATING=0']
+exp_env.AppendUnique(CPPPATH = _HPATH, CCFLAGS = _CFLAGS)
+Export('exp_env')
+
+# to get ccoroutine library first
+lncc = SConscript('../../src/SConscript')
+
+# to get target
+source = Glob('*.c') + lncc
+exp_env.Program(target = 'yield_from_e', source = source)
+

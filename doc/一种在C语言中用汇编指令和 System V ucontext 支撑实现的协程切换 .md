@@ -817,10 +817,8 @@ gitee  备份：[https://gitee.com/misskissC/ccoroutine](https://gitee.com/missk
 ### 10 运行体验
 运行 2e+7 个简单的协程体验一下吧。1e+7 个_co_yield_from_fn 和 1e+7 个_co_fn。
 ```C
-[a@b loop_e]$ make
-gcc -Wall -g -I../../include -DRUNNING_WHEN_CREATING=1 -DMEMORY_ALLOC_PRE=0 \
-    -o loop_e \
-    ../../src/ln_cs.c ./loop_e.c
+[a@b loop_e]$ scons -Q
+...
 [a@b loop_e]$
 [a@b loop_e]$ ./loop_e 2>o.txt
 [a@b loop_e]$ vi o.txt

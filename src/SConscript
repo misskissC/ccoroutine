@@ -1,0 +1,42 @@
+'''
+brief: get the ccoroutine library. i.e., lncc.
+
+predefined macros would decide if ccoroutines to 
+own more efficient on scheduling.
+[1] -DRUNNING_WHEN_CREATEING=1, running created 
+     coroutines when creating new one.
+[2] -DMEMORY_ALLOC_PRE=1, pre-allocate memory
+    for coroutines.
+
+the MEMORY_ALLOC_PRE=0, RUNNING_WHEN_CREATING=1
+are defaulted. you can make different choices 
+on different computers.
+
+lxr, 2020.04
+'''
+# import user's environment named `exp_env`,
+# set new Environment self if user did't 
+# export `exp_env`.
+try:
+    Import('exp_env')
+except:
+    exp_env = Environment()
+    _CFLAGS = ['-DCCTX_ASM',
+        '-DMEMORY_ALLOC_PRE=0'
+        '-DRUNNING_WHEN_CREATING=1']
+    exp_env.Append(CCFLAGS=_CFLAGS)
+
+# add new properties if environment hadn't them
+_CFLAGS = ['-Wall', '-g']
+_HPATH  = ['../include', 'context/']
+exp_env.AppendUnique(CCFLAGS = _CFLAGS, CPPPATH = _HPATH)
+
+# to get object of coroutine-switching first
+cctx_o = SConscript('context/SConscript')
+
+# to get ccoroutine library then return it
+source = Glob('*.c') + cctx_o
+lncc   = exp_env.Library(target = 'lncc', source = source)
+
+Return('lncc')
+

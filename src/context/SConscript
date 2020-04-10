@@ -1,0 +1,27 @@
+'''
+brief: to get the coroutine-switching
+       supporter by user's choice. 
+
+following predefined macros decide the 
+supporter of coroutine-switching.
+[1] CCTX_UC  - System V ucontext;
+[2] CCTX_ASM - assembly-instructions, self implement.
+
+CCTX_ASM is defaulted.
+
+lxr, 2020.04
+'''
+# try to import user's environment,
+# set new on if user didn't export `exp_env`.
+try:
+    Import('exp_env')
+except:
+    exp_env = Environment()
+    exp_env.Append(CCFLAGS = ['-DCCTX_ASM'])
+
+if '-DCCTX_UC' in str(exp_env['CCFLAGS']):
+    cctx_o = SConscript('ucontext/SConscript')
+else:
+    cctx_o = SConscript('assembly/SConscript')
+
+Return('cctx_o')
