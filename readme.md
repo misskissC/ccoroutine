@@ -1,28 +1,34 @@
 A coroutine switching implement by assembly && ucontext in C-language
 ----
 
-The coroutine switching implement in C-language called `ccoroutine` this time. it is powerful and lightweight.
+the coroutine switching implement in C-language called `ccoroutine` this time.
 
-The `co_yield()`, `co_yield_from()`, `co_send()`, `co_loop()` in `ccoroutine` are just like the `yield`, `yield from`, `generator.send()`, `asyncio.loop()` in python respectively. 
+`ccoroutine` is powerful and lightweight, it spports much more concurrency upper limit than thread or process, and it‘s major routines always less than 800 lines. 
 
-I have had wrote two blogs to flatter `ccoroutine`, but it‘s core routines always less than 800 lines, this is the reason i still love it.
-
-The potential bottleneck of `ccoroutine` besets me at the same time, so goddess hopes more knowledgeable guys just like you can **continue to improve it**.
+the potential bottleneck of `ccoroutine` besets me at the same time, so goddess hopes more knowledgeable guys just like you can **continue to improve it**.
 
 ### catalogs
-`src`, major logic for `ccoroutine`.the `SConscript` in `src/` would build out ccoroutine library. use `lncc = SConscript('../../src/SConscript')` to get the library path by `SConstruct` in experiences/applications.
+`src`, major C-routines for `ccoroutine`.
 
-`context`, coroutine switching supporter, including assembly and ucontext.
+`co_yield()`, `co_yield_from()`, `co_send()`, `co_loop()` implemented in `src`, they are just like the `yield`, `yield from`, `generator.send()`, `asyncio.loop()` in python respectively. In other words, `ccoroutine` is the program which implement python's `yield`(and so on) in C language.
 
-`experiences`, namely examples for `ccoroutine`, `co_yield`, `co_send`, `co_yield_from`, `co_loop` included.
+the `SConscript` buildin `src` used to build ccoroutine library. using 
+```python
+lncc = SConscript('../../src/SConscript')
+```
+to get the library path by `SConstruct` in experiences/applications, say the `SConstruct` in `experiences/loop_e`. 
 
-`doc`, chinese documents or development-diary for `ccoroutine`.
+`context`, the coroutine-switching supporters, including assembly and ucontext.
+
+`experiences`, namely examples for `ccoroutine`, `co_yield`, `co_send`, `co_yield_from` and `co_loop` included.
+
+`doc`, development-diary for `ccoroutine` in chinese.
 
 ### running experience
-if you owns one running 20000000 simple coroutines such as `_co_yield_from_fn` && `_co_fn` in `loop_e` on a server-computer to experience `ccoroutine`.
-10000000 coroutines(_co_fn) switching, other 10000000 coroutines(_co_yield_from_fn) used to sync the former 10000000 coroutines to terminate respectively.
+let us run 20000000 simple coroutines such as `_co_yield_from_fn` && `_co_fn` in `loop_e` on a server-computer to experience `ccoroutine`.
+10000000 coroutines(_co_fn) switching, other 10000000 coroutines(_co_yield_from_fn) used to synchronize the former 10000000 coroutines to terminate respectively.
 
-running `scons -Q` to build the target program.
+running `scons -Q` to build the target program `loop_e`.
 ```C
 [a@b loop_e]$ scons -Q
 ...
@@ -35,7 +41,7 @@ running `scons -Q` to build the target program.
 10000000 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
 ```
 
-start 'top' on another terminal to see the little memory consumption.
+start 'top' on another terminal when `loop_e` running.
 ```C
 top - 16:41:24 up 3 days,  8:02,  3 users,  load average: 0.49, 0.24, 0.15
 Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
@@ -44,4 +50,4 @@ Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
   PID USER    PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
 18036  lxr    20   0    4348    352    276 R  28.2  0.0   0:12.37  loop_e
 ```
-the memory consumption will increase more when the corotines' number and running time growth, of course.
+the memory consumption will increase more when the corotines' number and running-time growth, of course.
