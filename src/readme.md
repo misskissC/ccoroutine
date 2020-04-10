@@ -1,1 +1,1 @@
-the `SConscript` here would build out ccoroutine library. use `lncc = SConscript('~/src/SConscript')` to get the library path to `lncc` in `SConstruct` of your experiences/applications.
+the `SConscript` here would build out ccoroutine library. use `lncc = SConscript('~/src/SConscript')` to get the library path to `lncc` by `SConstruct` in your experiences/applications.
