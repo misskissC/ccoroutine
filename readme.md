@@ -1,4 +1,4 @@
-A coroutine switching implement by ucontext && assembly in C-language
+A coroutine switching implement by assembly && ucontext in C-language
 ----
 
 The coroutine switching implement in C-language called `ccoroutine` this time. it is powerful and lightweight.
