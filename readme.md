@@ -10,27 +10,6 @@ I have had wrote two blogs to flatter `ccoroutine`, but it‘s core routines alw
 The potential bottleneck of `ccoroutine` besets me at the same time, so goddess hopes more knowledgeable guys just like you can **continue to improve it**.
 
 ### catalogs
-```C
-.
-├── src
-│   ├── ln_co.c
-│   ├── SConscript
-│   └── context
-│       ├── ln_context.h
-│       ├── SConscript
-│       ├── assembly
-│       │   ├── ln_asm.c
-│       │   └── SConscript
-│       └── ucontext
-│            ├── ln_uc.c
-│            └── SConscript
-├── include
-│   ├── ln_co.h
-│   └── ln_comm.h
-├── doc
-├── experiences
-└── readme.md
-```
 `src`, core logic for `ccoroutine`.
 
 `context`, coroutine switching supporter.
@@ -39,7 +18,7 @@ The potential bottleneck of `ccoroutine` besets me at the same time, so goddess 
 
 `doc`, chinese documents or notes for `ccoroutine`.
 
-the `SConscript` in `src/` would build out ccoroutine library. use `lncc = SConscript('../../src/SConscript')` to get the library path in `SConstruct` of experiences.
+the `SConscript` in `src/` would build out ccoroutine library. use `lncc = SConscript('../../src/SConscript')` to get the library path by `SConstruct` in experiences/applications.
 
 ### running experience
 if you owns one running 20000000 simple coroutines such as `_co_yield_from_fn` && `_co_fn` in `loop_e` on a server-computer to experience `ccoroutine`.
