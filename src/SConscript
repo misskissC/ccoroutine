@@ -3,6 +3,7 @@ brief: get the ccoroutine library. i.e., lncc.
 
 predefined macros would decide if ccoroutines to 
 own more efficient on scheduling.
+
 [1] -DRUNNING_WHEN_CREATEING=1, running created 
      coroutines when creating new one.
 [2] -DMEMORY_ALLOC_PRE=1, pre-allocate memory

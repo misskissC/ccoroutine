@@ -1,1 +1,1 @@
-just some examples to experiences ccoroutines. the core routines are in src/*.
+just some examples to experience ccoroutine. the core routines are in `src`.
