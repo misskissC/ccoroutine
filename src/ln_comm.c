@@ -44,7 +44,7 @@ buffered_vfprintf (register _IO_FILE *s, const CHAR_T *format,
 #include "ln_comm.h"
 #include <stdarg.h>
 
-/* use _wfprintf() to instead `print family in glibc` 
+/* use ln_fprintf to instead `print family in glibc` 
    would reduce about 10Kib stack memory. 
    
    further, the stack consuming of coroutine is 
