@@ -58,7 +58,7 @@ ln_fprintf(int maxb, const char *fmt, ...)
     char *buf = NULL;
 
     buf = calloc(maxb + 1, 1);
-    if (!buf) return CODE_NOMEM;
+    IF_EXPS_THEN_RETURN(!buf, CODE_NOMEM);
 
     va_start(args, fmt);
     ret = fwrite(buf, 1, vsnprintf(buf, maxb, fmt, args), stderr);
