@@ -3,7 +3,7 @@
 ### 1 简介
 此次用C语言实现的协程切换程序被称作`ccoroutine`。
 
-`ccoroutine`的主要特点是强大和轻量——同线程和进程相比，其拥有更大的并发上限（参与并发的协程所需内存资源更少，线程运行栈分配参考值为4M，ccoroutine协程为11K）；另外，`ccoroutine`的核心逻辑代码还未达800行，这是开发过程中持续简化的结果（保证阅读性前提下）。
+`ccoroutine`的主要特点是强大和轻量——同线程和进程相比，其拥有更大的并发上限（参与并发的协程所需内存资源更少，线程运行栈分配参考值为4Mib，ccoroutine协程为3Kib）；另外，`ccoroutine`的核心逻辑代码还未达800行，这归功于开发过程中的持续优化（保证阅读性前提下）。
 
 话说回来，`ccoroutine`潜在瓶颈（文档中有所提及）也困扰着我，希望真正的饱学之士路过时能帮忙继续提升他。
 
@@ -40,10 +40,10 @@ scons -Q
 [a@b loop_e]$
 [a@b loop_e]$ ./loop_e 2>o.txt
 [a@b loop_e]$ vi o.txt
-       1 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
+       1 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return: 012
 ...
- 9999999 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
-10000000 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return-value: 012
+ 9999999 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return: 012
+10000000 '_co_yield_from_fn' sync '_co_fn' terminated. '_co_fn' return: 012
 ```
 可见，`co_yield_from()`在同步子协程`co_fn`运行的同时，还支持着整个在协程层面的并发性。
 

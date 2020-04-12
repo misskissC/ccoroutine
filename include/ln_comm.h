@@ -24,6 +24,10 @@ typedef enum comm_status_code {
     CODE_MAX
 } comm_code_e;
 
+#define _TIPS_MAX_SIZE  (1024)
+extern int 
+ln_fprintf(int maxb, const char *fmt, ...);
+
 /** 
  * high frequency used */
 #ifdef __GNUC__
@@ -66,7 +70,7 @@ do { \
 #define IF_EXPS_THEN_TIPS(exps, format, ...) \
 ({ \
     if (exps) { \
-        fprintf(stderr, format, ##__VA_ARGS__); \
+        ln_fprintf(_TIPS_MAX_SIZE, format, ##__VA_ARGS__); \
     } \
 })
 #endif
@@ -75,7 +79,7 @@ do { \
 #define IF_EXPS_THEN_TIPS_AND_RETURN(exps, retv, format, ...) \
 ({ \
     if (exps) { \
-        fprintf(stderr, format, ##__VA_ARGS__); \
+        ln_fprintf(_TIPS_MAX_SIZE, format, ##__VA_ARGS__); \
         return retv; \
     } \
 })

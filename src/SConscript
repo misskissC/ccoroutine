@@ -7,10 +7,12 @@ own more efficient on scheduling.
      coroutines when creating new one.
 [2] -DMEMORY_ALLOC_PRE=1, pre-allocate memory
     for coroutines.
+[3] -DUSE_LNPF=1, using the `ln_printf()` to instead 
+    `print family in gilbc` to reduce stack.
 
-the MEMORY_ALLOC_PRE=0, RUNNING_WHEN_CREATING=1
-are defaulted. you can make different choices 
-on different computers.
+the MEMORY_ALLOC_PRE=0, RUNNING_WHEN_CREATING=1,
+USE_WPF=0 are defaulted. you can make different 
+choices on different computers.
 
 lxr, 2020.04
 '''
@@ -22,7 +24,6 @@ try:
 except:
     exp_env = Environment()
     _CFLAGS = ['-DCCTX_ASM',
-        '-DMEMORY_ALLOC_PRE=0'
         '-DRUNNING_WHEN_CREATING=1']
     exp_env.Append(CCFLAGS=_CFLAGS)
 

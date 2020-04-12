@@ -11,11 +11,20 @@
 #include <stdint.h>
 
 #define BYTES
+#if USE_LNPF /* use ln_printf */
+#define CS_GLIBC_PF (0)
+
+#else
+/* stack for `print family` in glibc */
+#define CS_GLIBC_PF ((1024 << 3) + (1024 << 2))
+
+#endif
+
 /* enlarge this value when stack of interfaces 
    in ln_co.c enlarged. */
-#define CS_MARGIN  (1024)BYTES
-#define CCTX_STACK (((1024 << 3) + (1024 << 1) + 1024))
-#define CS_INNER_STACK (CS_MARGIN + CCTX_STACK)
+#define CS_MARGIN  (1024)
+#define CCTX_STACK ((1024 << 1) + CS_GLIBC_PF)
+#define CS_INNER_STACK (CS_MARGIN + CCTX_STACK)BYTES
 
 typedef struct coroutine_info_s    ci_s;
 typedef struct coroutine_control_s cc_s;

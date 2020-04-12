@@ -16,10 +16,9 @@
  *     movq    %rsp, %rbp
  *     subq    $48, %rsp
  * ... */
-#define _COFN      (48)
-#define _CO_MARGIN (0)
+#define _COFN      ((48))
 #define _CO_STACK  (_COFN + CS_INNER_STACK)
-#define CMMB_UNIT  (_CO_STACK + _CO_MARGIN)
+#define CMMB_UNIT  (_CO_STACK)
 #define CNR_UNIT   (1)
 
 #define _HL32TOUPTR(l32, h32) \
@@ -33,7 +32,7 @@ typedef struct _co_arg_s {
 /* coroutine type is co_t, see ln_cs.h. */
 static void 
 _co_fn(uint32_t ci_l32, uint32_t ci_h32, 
-        uint32_t arg_l32, uint32_t arg_h32)
+    uint32_t arg_l32, uint32_t arg_h32)
 {
     ci_s *ci;
     cofn_arg_s *ar;
@@ -45,7 +44,7 @@ _co_fn(uint32_t ci_l32, uint32_t ci_h32,
 
     int i, nr = ar->nr;
     for (i = 0; i < nr; ++i) {
-        fprintf(stderr, "%d\n", i);
+        ln_fprintf(10, "%d\n", i);
         IF_EXPS_THEN_RETURN(co_yield(ci), VOIDV);
     }
 

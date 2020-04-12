@@ -8,6 +8,8 @@
 #include "ln_comm.h"
 #include <string.h>
 
+#define _IS_UFREE(mtype) (mtype == MM_HEAP_UFREE)
+
 /* the stack needed by interfaces is about CS_INNER_STACK.
  * the _fo_fn's stack got by its assembly:
  * 
@@ -17,9 +19,8 @@
  *     subq    $48, %rsp
  * ... */
 #define _COFROMFN  (48)
-#define _CO_MARGIN (0)
 #define _CO_STACK  (_COFROMFN + CS_INNER_STACK)
-#define CMMB_UNIT  (_CO_STACK + _CO_MARGIN)
+#define CMMB_UNIT  (_CO_STACK)
 #define CNR_UNIT   (6 << 1)
 
 #define _HL32TOUPTR(l32, h32) \
@@ -75,15 +76,18 @@ _co_yield_from_fn(uint32_t ci_l32, uint32_t ci_h32,
     crv_s *rv = NULL;
     rv = co_yield_from(co_cc(ci), ci, "_co_fn", _co_fn, ar);
 
+    /* routines fowlling wouldn't be execute until 
+       co_yield_from() sync its child-coroutine end.
+       befor co_yield_from ending, co_yield_from() 
+       return to it's father-coroutine. */
     int i;
-    fprintf(stderr, "'%s' sync '_co_fn' terminated."
-        " '%s' return-value: ", __func__, co_id(ci));
+    IF_EXPS_THEN_TIPS(true, "'%s' sync '_co_fn' terminated."
+        " '%s' return: ", __func__, co_id(ci));
     for (i = 0; i < rv->len; ++i)
-        fprintf(stderr, "%d", ((int *)(rv->buf))[i]);
-    fprintf(stderr, "\n");
-    if (MM_HEAP_UFREE == rv->flag) {
-        free(rv->buf);
-    }
+        IF_EXPS_THEN_TIPS(true, "%d", ((int *)(rv->buf))[i]);
+    IF_EXPS_THEN_TIPS(true, "\n");
+
+    _IS_UFREE(rv->flag) ? free(rv->buf) : 0;
     
     co_end(ci);
     return ;
@@ -104,22 +108,6 @@ _co_loop_all(cc_s *cc, int conr)
     return ;
 }
 
-static void 
-_loop_all_time(cc_s *cc, int conr)
-{
-    #include <sys/time.h>
-    
-    struct timeval tv_s, tv_e;
-
-    (void)gettimeofday(&tv_s, NULL);
-    _co_loop_all(cc, conr);
-    (void)gettimeofday(&tv_e, NULL);
-
-    fprintf(stderr, "time spend %.0fmicroseconds on sync %d %s\n", 
-        (tv_e.tv_sec*1e+6 + tv_e.tv_usec) - (tv_s.tv_sec*1e+6 + tv_s.tv_usec),
-        conr, "_co_fn");
-}
-
 int callconvention 
 main(void)
 {
@@ -128,7 +116,7 @@ main(void)
     cc  = co_init(CNR_UNIT, CMMB_UNIT);
     IF_EXPS_THEN_TIPS_AND_RETURN(!cc, CODE_NOMEM,
         "no enough memory on this machine now\n");
-    _loop_all_time(cc, 1e+5);
+    _co_loop_all(cc, 1e+5);
     co_deinit(cc);
 
     return 0;
