@@ -11,6 +11,8 @@ own more efficient on scheduling.
     
 [3] -DUSE_LNPF=1, using the `ln_printf()` to instead 
     `print family in gilbc` to reduce stack.
+    **the stack consuming is very small(less than 1Kib) 
+    if no error-logs for coroutines.**
 
 the MEMORY_ALLOC_PRE=0, RUNNING_WHEN_CREATING=1,
 USE_LNPF=0 are defaulted. you can make different 
