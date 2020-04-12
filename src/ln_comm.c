@@ -61,7 +61,7 @@ ln_fprintf(int maxb, const char *fmt, ...)
     IF_EXPS_THEN_RETURN(!buf, CODE_NOMEM);
 
     va_start(args, fmt);
-    ret = fwrite(buf, 1, vsnprintf(buf, maxb, fmt, args), stderr);
+    ret = fwrite(buf, 1, vsnprintf(buf, maxb + 1, fmt, args), stderr);
     va_end(args);
 
     free(buf);
